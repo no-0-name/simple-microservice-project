@@ -33,11 +33,11 @@ public class AuthController {
 
         User user = User.builder()
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))// Пароль будет закодирован в сервисе
+                .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .role(Role.USER) // По умолчанию USER
+                .role(Role.USER)
                 .build();
 
         userService.saveUser(user);
@@ -67,18 +67,15 @@ public class AuthController {
             @AuthenticationPrincipal User currentUser,
             @RequestBody UpdateUserRequest request) {
 
-        // Проверка, что новый пароль отличается от старого
         if (passwordEncoder.matches(request.getPassword(), currentUser.getPassword())) {
             return ResponseEntity.badRequest().body("The new password must be different from the old one");
         }
 
-        // Обновляем данные пользователя
         currentUser.setEmail(request.getEmail());
         currentUser.setPassword(passwordEncoder.encode(request.getPassword()));
         currentUser.setFirstName(request.getFirstName());
         currentUser.setLastName(request.getLastName());
 
-        // Сохраняем и отправляем уведомления (если это обычный пользователь)
         User updatedUser = userService.updateUser(currentUser);
 
         return ResponseEntity.ok(UserResponse.fromUser(updatedUser));
